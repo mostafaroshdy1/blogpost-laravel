@@ -1,14 +1,8 @@
-<!-- resources/views/posts/trash.blade.php -->
+@extends('posts.layouts.main')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trash</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+@section('title', 'Trash')
+
+@section('content')
     <div class="container">
         <div class="row">
             <div class="col-md-8 offset-md-2">
@@ -35,7 +29,4 @@
             </div>
         </div>
     </div>
-
-    
-</body>
-</html>
+@endsection
