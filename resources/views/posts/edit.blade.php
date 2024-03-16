@@ -1,4 +1,4 @@
-@extends('posts.layouts.main')
+@extends('layouts.main')
 
 @section('title', 'Edit Post')
 

@@ -1,4 +1,4 @@
-@extends('posts.layouts.main')
+@extends('layouts.main')
 
 @section('title', 'Create New Post')
 
@@ -20,15 +20,7 @@
                             <div class="form-group">
                                 <label for="body">Body</label>
                                 <textarea class="form-control" id="body" name="body" rows="5" required></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="user">Select User</label>
-                                <select class="form-control" id="user" name="user_id" required>
-                                    @foreach($users as $user)
-                                        <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            </div>                         
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -14,7 +16,6 @@ class PostController extends Controller
      */
     public function index()
     {
-        // \App\Models\User::factory(10)->create();
         $posts = Post::with('user')->orderByDesc('created_at')->paginate(4);
         return view('posts.index', ["posts" => $posts]);
     }
@@ -25,30 +26,27 @@ class PostController extends Controller
     public function create()
     {
         //
-        $users = User::all();
-        return view('posts.create', ["users" => $users]);
+
+        return view('posts.create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        // Validate request data
-        $validatedData = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required',
-            'user_id' => 'required|exists:users,id',
-        ]);
+        $validatedData = $request->validated();
         $post = new Post();
         $post->title = $validatedData['title'];
         $post->body = $validatedData['body'];
-        $post->user_id = $validatedData['user_id'];
+        $post->user_id = Auth::id();
         $post->enabled = 1;
         $post->published_at = now();
         $post->save();
-
-        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
+        $user = User::find(Auth::id());
+        $user->posts_count++;
+        $user->save();
+        return redirect()->route('posts.index');
     }
 
     /**
@@ -77,19 +75,16 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdatePostRequest $request, $id)
     {
-        $validatedData = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required',
-        ]);
-
-        $post = Post::findOrFail($id);
-        $post->title = $validatedData['title'];
-        $post->body = $validatedData['body'];
-        $post->save();
+        $validatedData = $request->validated();
+        Post::where('id', $id)->update([
+            'title' => $validatedData['title'],
+            'body' => $validatedData['body'],
+        ]);;
         return redirect()->route('posts.index');
     }
+
 
     /**
      * Remove the specified resource from storage.
