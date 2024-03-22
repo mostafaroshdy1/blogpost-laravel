@@ -11,7 +11,7 @@
                         <h5 class="card-title">Create New Post</h5>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('posts.store') }}" method="POST">
+                        <form action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
                                 <label for="title">Title</label>
@@ -20,7 +20,11 @@
                             <div class="form-group">
                                 <label for="body">Body</label>
                                 <textarea class="form-control" id="body" name="body" rows="5" required></textarea>
-                            </div>                         
+                            </div>    
+                            <div class="form-group">
+                                <label for="image">Upload Image</label>
+                                <input type="file" class="form-control-file" id="image" name="image">
+                            </div>                     
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>

@@ -11,6 +11,9 @@
                         <h5 class="card-title">{{ $post->title }}</h5>
                     </div>
                     <div class="card-body">
+                        @if($post->image)
+                            <img src="{{ Storage::disk('public')->url($post->image) }}" class="img-fluid mb-3" alt="Post Image">
+                        @endif
                         <p>{{ $post->body }}</p>
                         <small>Created: {{ $post->created_at }}</small><br>
                         <small>Updated: {{ $post->updated_at }}</small><br>

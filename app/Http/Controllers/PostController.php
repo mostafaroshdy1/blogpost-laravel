@@ -40,8 +40,12 @@ class PostController extends Controller
         $post->title = $validatedData['title'];
         $post->body = $validatedData['body'];
         $post->user_id = Auth::id();
-        $post->enabled = 1;
+        $post->enabled = 0;
         $post->published_at = now();
+        if ($request->has('image') && $request->file("image")->isValid()) {
+            $imagePath = $request->file('image')->store('posts', ['disk' => 'public']);
+            $post->image = $imagePath;
+        }
         $post->save();
         $user = User::find(Auth::id());
         $user->posts_count++;
@@ -92,6 +96,11 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         Post::find($id)->delete();
+        // to recalculate the number of posts for each user => to be changed later
+        $users = User::all();
+        foreach ($users as $user) {
+            $user->update(['posts_count' => Post::where('user_id', $user->id)->count()]);
+        }
         return redirect()->route('posts.index');
     }
 }

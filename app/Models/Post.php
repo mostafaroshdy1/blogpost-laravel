@@ -11,7 +11,7 @@ class Post extends Model
 {
     use HasFactory;
     use SoftDeletes;
-    protected $fillable = ['title', 'body', 'enabled', 'user_id'];
+    protected $fillable = ['title', 'body', 'enabled', 'user_id', 'image'];
 
 
     public function user(): BelongsTo
