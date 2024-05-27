@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\PostService;
 use App\Models\Post;
 use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Auth;
@@ -14,9 +14,15 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
+    protected $postService;
+
+    public function __construct(PostService $postService)
+    {
+        $this->postService = $postService;
+    }
     public function index()
     {
-        $posts = Post::with('user')->orderByDesc('created_at')->paginate(4);
+        $posts = $this->postService->getPaginated(4);
         return view('posts.index', ["posts" => $posts]);
     }
 
@@ -35,18 +41,8 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
-        $validatedData = $request->validated();
-        $post = new Post();
-        $post->title = $validatedData['title'];
-        $post->body = $validatedData['body'];
-        $post->user_id = Auth::id();
-        $post->enabled = 0;
-        $post->published_at = now();
-        if ($request->has('image') && $request->file("image")->isValid()) {
-            $imagePath = $request->file('image')->store('posts', ['disk' => 'public']);
-            $post->image = $imagePath;
-        }
-        $post->save();
+
+        $this->postService->createPost($request->validated());
         $user = User::find(Auth::id());
         $user->posts_count++;
         $user->save();
@@ -58,12 +54,12 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        $post = Post::find($id);
+        $post = $this->postService->findById($id);
         return view('posts.show', ['post' => $post]);
     }
     public function showTrash()
     {
-        $deletedPosts = Post::onlyTrashed()->get();
+        $deletedPosts = $this->postService->getTrash();
         return view('posts.trash', ['deletedPosts' => $deletedPosts]);
     }
 
@@ -72,7 +68,7 @@ class PostController extends Controller
      */
     public function edit(string $id)
     {
-        $post = Post::find($id);
+        $post = $this->postService->findById($id);
         return view('posts.edit', ['post' => $post]);
     }
 
@@ -81,11 +77,7 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, $id)
     {
-        $validatedData = $request->validated();
-        Post::where('id', $id)->update([
-            'title' => $validatedData['title'],
-            'body' => $validatedData['body'],
-        ]);;
+        $this->postService->updateById($request->validated(), $id);
         return redirect()->route('posts.index');
     }
 
@@ -95,7 +87,9 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        Post::find($id)->delete();
+        $this->postService->deleteById($id);
+
+
         // to recalculate the number of posts for each user => to be changed later
         $users = User::all();
         foreach ($users as $user) {
